@@ -1,4 +1,4 @@
-package com.example.ernestchechelski.projectcards.Cards;
+package com.example.ernestchechelski.projectcards.cardsService;
 
 import com.google.gson.GsonBuilder;
 

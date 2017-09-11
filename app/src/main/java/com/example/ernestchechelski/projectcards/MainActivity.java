@@ -3,9 +3,9 @@ package com.example.ernestchechelski.projectcards;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import com.example.ernestchechelski.projectcards.Cards.CardsCallback;
-import com.example.ernestchechelski.projectcards.Cards.CardsService;
-import com.example.ernestchechelski.projectcards.Cards.Model.DeckResponse;
+import com.example.ernestchechelski.projectcards.cardsService.CardsCallback;
+import com.example.ernestchechelski.projectcards.cardsService.CardsService;
+import com.example.ernestchechelski.projectcards.model.DeckResponse;
 
 public class MainActivity extends AppCompatActivity {
 

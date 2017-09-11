@@ -1,4 +1,4 @@
-package com.example.ernestchechelski.projectcards.Cards.Model;
+package com.example.ernestchechelski.projectcards.model;
 
 /**
  * Created by ernest.chechelski on 9/11/2017.

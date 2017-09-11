@@ -1,12 +1,11 @@
-package com.example.ernestchechelski.projectcards.Cards;
+package com.example.ernestchechelski.projectcards.cardsService;
 
 import android.util.Log;
 
-import com.example.ernestchechelski.projectcards.Cards.Model.DeckResponse;
+import com.example.ernestchechelski.projectcards.model.DeckResponse;
 
 import javax.inject.Inject;
 
-import dagger.Provides;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;

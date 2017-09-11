@@ -1,7 +1,9 @@
-package com.example.ernestchechelski.projectcards.Cards;
+package com.example.ernestchechelski.projectcards.cardsService;
 
-import com.example.ernestchechelski.projectcards.Cards.Model.DrawResponse;
-import com.example.ernestchechelski.projectcards.Cards.Model.DeckResponse;
+
+import com.example.ernestchechelski.projectcards.model.DeckResponse;
+import com.example.ernestchechelski.projectcards.model.DrawResponse;
+
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
