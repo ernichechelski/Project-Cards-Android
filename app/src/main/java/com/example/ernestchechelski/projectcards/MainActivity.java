@@ -18,31 +18,44 @@ import com.example.ernestchechelski.projectcards.model.Card;
 import com.example.ernestchechelski.projectcards.model.DeckResponse;
 import com.example.ernestchechelski.projectcards.model.DrawResponse;
 import java.util.ArrayList;
+import java.util.List;
+
 import javax.inject.Inject;
 
 public class MainActivity extends AppCompatActivity {
 
     public static String TAG = MainActivity.class.getSimpleName();
+
     private GridView gridView;
     private GridViewAdapter gridAdapter;
     private ArrayList<Card> cards = new ArrayList<>();
 
-    Button restartButton;
-    Button getNextCardsButton;
+    private Button restartButton;
+    private Button getNextCardsButton;
 
-    String deckId;
-    Integer decks;
+    private String deckId;
+    private Integer decks;
+    private String decksCountAnswer = "";
+
 
     @Inject
     CardsService cardsService;
 
-
-
-    private String m_Text = "";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        injectDependencies();
+        setUI();
+        showDecksCountQuestionAlert();
+    }
 
+
+
+    private void injectDependencies() {
+        ((MyApplication)getApplication()).getAppComponent().inject(this);
+    }
+
+    private void setUI() {
         setContentView(R.layout.activity_main);
         restartButton = (Button) findViewById(R.id.restartGameButton);
         restartButton.setOnClickListener(new View.OnClickListener() {
@@ -60,18 +73,12 @@ public class MainActivity extends AppCompatActivity {
                     MainActivity.this.drawCardFromDeck(deckId, 1);
             }
         });
-        ((MyApplication)getApplication()).getAppComponent().inject(this);
+
         gridView = (GridView) findViewById(R.id.gridView);
 
         gridAdapter = new GridViewAdapter(this, R.layout.card_item_layout, cards);
         gridView.setAdapter(gridAdapter);
-        showDecksCountQuestionAlert();
-
-        //startGame(1);
-
     }
-    // Prepare some dummy data for gridview
-
 
 
     private void startGame(Integer decks) {
@@ -102,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void drawCardFromDeck(String deckId, Integer cards) {
+    private void drawCardFromDeck(String deckId, final Integer cards) {
         cardsService.drawCardFromDeck(deckId, cards, new CardsCallback<DrawResponse>() {
             @Override
             public void onResponse(final DrawResponse response) {
@@ -115,6 +122,10 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         gridAdapter.addAll(response.getCards());
+                        for(Card c:response.getCards()){
+                            Log.d(TAG,"Game value of"+c+" is"+c.getGameValue());
+                        }
+                        gridView.smoothScrollToPosition(gridAdapter.getCount());
                     }
                 });
                 Log.d(TAG,response.toString());
@@ -128,6 +139,20 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+
+    private void showWonAlert() {
+        AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+        alertDialog.setTitle("WIN!");
+        alertDialog.setMessage("$$$$$$$$$$$$");
+        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        alertDialog.show();
+    }
 
     private void showWarnAlert() {
         AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
@@ -154,8 +179,8 @@ public class MainActivity extends AppCompatActivity {
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                m_Text = input.getText().toString();
-                Integer decks1 = Integer.valueOf(m_Text);
+                decksCountAnswer = input.getText().toString();
+                Integer decks1 = Integer.valueOf(decksCountAnswer);
                 MainActivity.this.startGame(decks1);
             }
         });
@@ -166,6 +191,35 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         builder.show();
+    }
+
+    public static void checkCards(List<Card> cards){
+
+        int size = cards.size();
+        for(int x=0;x<size;x++){
+
+            Integer matchingCounter = 0;
+
+            Card card = cards.get(x);
+
+            Integer cardValue = card.getGameValue();
+
+            for(int y=x;y<size;y++){
+                Card nextCard = cards.get(y);
+                if(nextCard.getGameValue()==(cardValue+(x-y))){
+                    matchingCounter++;
+                }
+            }
+
+        
+
+
+            if(matchingCounter==3){
+                return;
+            }
+        }
+
+
     }
 
 

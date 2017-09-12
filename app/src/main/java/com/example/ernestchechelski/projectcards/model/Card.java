@@ -56,6 +56,25 @@ public class Card {
         this.code = code;
     }
 
+    public Integer getGameValue(){
+        try{
+            switch (this.getValue()){
+                case "ACE":
+                    return 1;
+                case "KING":
+                    return 12;
+                case "QUEEN":
+                    return 11;
+                case "JACK":
+                    return 10;
+                default:
+                    return Integer.valueOf(this.getValue().toCharArray()[0]+"");
+            }
+        }
+        catch (Exception e){
+            return -1;
+        }
+    }
     @Override
     public String toString() {
         return "Card{" +
