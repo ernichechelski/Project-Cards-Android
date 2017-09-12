@@ -17,8 +17,8 @@ import retrofit2.Response;
  */
 
 public class RetrofitCardsService implements CardsService{
-    public static String TAG = RetrofitCardsService.class.getSimpleName();
 
+    public static String TAG = RetrofitCardsService.class.getSimpleName();
 
     @Inject
     CardsServiceApi cardsServiceApi;
@@ -27,11 +27,31 @@ public class RetrofitCardsService implements CardsService{
         ((MyApplication)context).getAppComponent().inject(this);
     }
 
-
-
-
     public void shuffle(Integer decks,final CardsCallback<DeckResponse> callback){
         Call<DeckResponse> shuffleResponse = cardsServiceApi.shuffleDeck(decks);
+        shuffleResponse.enqueue(new Callback<DeckResponse>() {
+            @Override
+            public void onResponse(Call<DeckResponse> call, Response<DeckResponse> response) {;
+                Log.d(TAG,response.toString());
+                if (response!=null){
+                    callback.onResponse(response.body());
+                }
+                else {
+                    callback.onFailure(new Exception("Null response"));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<DeckResponse> call, Throwable t) {
+                Log.w(TAG,"onFailure",t);
+                callback.onFailure(t);
+            }
+        });
+    }
+
+    @Override
+    public void getNewDeck(final CardsCallback<DeckResponse> callback) {
+        Call<DeckResponse> shuffleResponse = cardsServiceApi.getNewDeck();
         shuffleResponse.enqueue(new Callback<DeckResponse>() {
             @Override
             public void onResponse(Call<DeckResponse> call, Response<DeckResponse> response) {;

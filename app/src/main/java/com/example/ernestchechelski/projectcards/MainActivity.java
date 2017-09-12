@@ -27,16 +27,32 @@ public class MainActivity extends AppCompatActivity {
         ((MyApplication)getApplication()).getAppComponent().inject(this);
 
         cardsService.shuffle(1, new CardsCallback<DeckResponse>() {
-                    @Override
-                    public void onResponse(DeckResponse response) {
-                        Log.d(TAG,response.toString());
-                    }
+            @Override
+            public void onResponse(DeckResponse response) {
+                Log.d(TAG,"shuffleOnResponse");
+                Log.d(TAG,response.toString());
+            }
 
-                    @Override
-                    public void onFailure(Throwable cause) {
-                        Log.d(TAG,cause.toString());
-                    }
-                });
+            @Override
+            public void onFailure(Throwable cause) {
+                Log.d(TAG,"shuffleOnFailure");
+                Log.d(TAG,cause.toString());
+            }
+        });
+
+        cardsService.getNewDeck(new CardsCallback<DeckResponse>() {
+            @Override
+            public void onResponse(DeckResponse response) {
+                Log.d(TAG,"getNewDeckOnResponse");
+                Log.d(TAG,response.toString());
+            }
+
+            @Override
+            public void onFailure(Throwable cause) {
+                Log.d(TAG,"getNewDeckOnFailure");
+                Log.d(TAG,cause.toString());
+            }
+        });
 
     }
 }

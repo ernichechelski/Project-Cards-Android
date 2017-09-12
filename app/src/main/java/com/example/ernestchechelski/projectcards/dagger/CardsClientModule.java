@@ -5,10 +5,6 @@ import android.content.Context;
 import com.example.ernestchechelski.projectcards.cardsService.CardsService;
 import com.example.ernestchechelski.projectcards.cardsService.CardsServiceApi;
 import com.example.ernestchechelski.projectcards.cardsService.RetrofitCardsService;
-import com.example.ernestchechelski.projectcards.cardsService.RetrofitCardsServiceFactory;
-import com.google.gson.GsonBuilder;
-
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -48,13 +44,7 @@ public class CardsClientModule {
 
     @Provides
     @Singleton
-    RetrofitCardsServiceFactory provideRetrofitCardsServiceFactory(Context context) {
-        return new RetrofitCardsServiceFactory(context);
-    }
-
-    @Provides
-    @Singleton
-    CardsServiceApi provideCardsServiceApi(RetrofitCardsServiceFactory factory){
-        return factory.create();
+    CardsServiceApi provideCardsServiceApi(Retrofit retrofit){
+        return  retrofit.create(CardsServiceApi.class);
     }
 }

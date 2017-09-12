@@ -16,4 +16,5 @@ import retrofit2.Response;
 
 public interface CardsService {
     public void shuffle(Integer decks,final CardsCallback<DeckResponse> callback);
+    public void getNewDeck(final CardsCallback<DeckResponse> callback);
 }
