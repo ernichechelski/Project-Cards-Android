@@ -24,17 +24,4 @@ public class CardsClientModule {
     CardsService provideCardsService() {
         return new RetrofitCardsService();
     }
-
-    @Provides
-    @Singleton
-    public CardsServiceApi create(){
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://deckofcardsapi.com")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        return  retrofit.create(CardsServiceApi.class);
-    }
-
-
 }
