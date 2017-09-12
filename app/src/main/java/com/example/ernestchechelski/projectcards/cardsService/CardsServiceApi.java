@@ -30,6 +30,4 @@ public interface CardsServiceApi {
     @GET("api/deck/{deck_id}/shuffle")
     Call<DrawResponse> reshuffleDeck(@Path("deck_id") String deck_id);
 
-
-
 }

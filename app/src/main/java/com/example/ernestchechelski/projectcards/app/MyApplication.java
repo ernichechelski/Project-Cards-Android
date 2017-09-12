@@ -17,11 +17,10 @@ public class MyApplication extends Application {
     public AppComponent getAppComponent() {
         return appComponent;
     }
-
+    //https://www.raywenderlich.com/146804/dependency-injection-dagger-2
     @Override
     public void onCreate() {
         super.onCreate();
-
         appComponent = initDagger(this);
     }
     protected AppComponent initDagger(MyApplication application) {
