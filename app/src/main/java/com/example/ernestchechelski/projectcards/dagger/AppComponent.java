@@ -3,6 +3,7 @@ package com.example.ernestchechelski.projectcards.dagger;
 import com.example.ernestchechelski.projectcards.MainActivity;
 import com.example.ernestchechelski.projectcards.cardsService.CardsService;
 import com.example.ernestchechelski.projectcards.cardsService.RetrofitCardsService;
+import com.example.ernestchechelski.projectcards.cardsService.RetrofitCardsServiceFactory;
 
 import javax.inject.Singleton;
 import dagger.Component;
@@ -15,4 +16,6 @@ import dagger.Component;
 public interface AppComponent {
     void inject(MainActivity target);
     void inject(CardsService target);
+    void inject(RetrofitCardsServiceFactory target);
+    void inject(RetrofitCardsService target);
 }

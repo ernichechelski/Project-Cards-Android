@@ -1,5 +1,6 @@
 package com.example.ernestchechelski.projectcards.cardsService;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.example.ernestchechelski.projectcards.app.MyApplication;
@@ -18,7 +19,15 @@ import retrofit2.Response;
 public class RetrofitCardsService implements CardsService{
     public static String TAG = RetrofitCardsService.class.getSimpleName();
 
-    CardsServiceApi cardsServiceApi = new RetrofitCardsServiceFactory().create();
+
+    @Inject
+    CardsServiceApi cardsServiceApi;
+
+    public RetrofitCardsService(Context context) {
+        ((MyApplication)context).getAppComponent().inject(this);
+    }
+
+
 
 
     public void shuffle(Integer decks,final CardsCallback<DeckResponse> callback){

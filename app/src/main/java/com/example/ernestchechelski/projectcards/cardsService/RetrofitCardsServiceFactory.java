@@ -1,6 +1,11 @@
 package com.example.ernestchechelski.projectcards.cardsService;
 
+import android.content.Context;
+
+import com.example.ernestchechelski.projectcards.app.MyApplication;
 import com.google.gson.GsonBuilder;
+
+import javax.inject.Inject;
 
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -10,12 +15,19 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 public class RetrofitCardsServiceFactory implements CardsServiceFactory  {
+
+    public RetrofitCardsServiceFactory(Context context) {
+        ((MyApplication)context).getAppComponent().inject(this);
+    }
+    @Inject
+    Retrofit retrofit;
+
     public CardsServiceApi create(){
-        Retrofit retrofit = new Retrofit.Builder()
+
+            /* retrofit =   new Retrofit.Builder()
                 .baseUrl("http://deckofcardsapi.com")
                 .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        GsonBuilder gsonBuilder = new GsonBuilder();
+                .build();*/
         return  retrofit.create(CardsServiceApi.class);
     }
 }
