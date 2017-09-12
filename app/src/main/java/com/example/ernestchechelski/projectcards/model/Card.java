@@ -3,8 +3,6 @@ package com.example.ernestchechelski.projectcards.model;
 /**
  * Created by ernest.chechelski on 9/11/2017.
  */
-
-
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -58,4 +56,13 @@ public class Card {
         this.code = code;
     }
 
+    @Override
+    public String toString() {
+        return "Card{" +
+                "image='" + image + '\'' +
+                ", value='" + value + '\'' +
+                ", suit='" + suit + '\'' +
+                ", code='" + code + '\'' +
+                '}';
+    }
 }

@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Project Cards</string>
+    <string name="getNextCard">Get next card</string>
+    <string name="restartGame">Restart game</string>
 </resources>
