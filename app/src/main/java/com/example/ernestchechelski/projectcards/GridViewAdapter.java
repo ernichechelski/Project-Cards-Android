@@ -24,7 +24,7 @@ public class GridViewAdapter extends ArrayAdapter {
     private int layoutResourceId;
     private List<Card> data = new ArrayList<Card>();
 
-    public GridViewAdapter(Context context, int layoutResourceId, ArrayList data) {
+    public GridViewAdapter(Context context, int layoutResourceId, List data) {
         super(context, layoutResourceId, data);
         this.layoutResourceId = layoutResourceId;
         this.context = context;

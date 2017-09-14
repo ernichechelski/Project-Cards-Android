@@ -19,7 +19,6 @@ import com.example.ernestchechelski.projectcards.model.DeckResponse;
 import com.example.ernestchechelski.projectcards.model.DrawResponse;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.inject.Inject;
 
 public class MainActivity extends AppCompatActivity {
@@ -28,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
 
     private GridView gridView;
     private GridViewAdapter gridAdapter;
-    private ArrayList<Card> cards = new ArrayList<>();
+    private List<Card> cards = new ArrayList<>();
 
     private Button restartButton;
     private Button getNextCardsButton;
@@ -90,6 +89,17 @@ public class MainActivity extends AppCompatActivity {
                 gridAdapter.clear();
             }
         });
+        getCards(decks);
+
+        //getPartialDeck();
+        String cardsCodes = null;
+        cardsCodes = "2H,2C,2D,2S,3C";
+        cardsCodes = "JH,KD,8H,3S,6D";
+
+        //getSampleCards(cardsCodes);
+    }
+
+    private void getCards(Integer decks) {
         cardsService.shuffle(decks, new CardsCallback<DeckResponse>() {
             @Override
             public void onResponse(DeckResponse response) {
@@ -109,6 +119,41 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void getPartialDeck() {
+        cardsService.getPartialDeck("2C,3C,4C,5C,6C", new CardsCallback<DeckResponse>() {
+            @Override
+            public void onResponse(DeckResponse response) {
+                Log.d(TAG,"getPartialDeckOnResponse");
+                Log.d(TAG,response.toString());
+                deckId = response.getDeckId();
+                Log.d(TAG,"Draw 5 cards from deck");
+                drawCardFromDeck(response.getDeckId(),5);
+            }
+
+            @Override
+            public void onFailure(Throwable cause) {
+                Log.d(TAG,"getPartialDeckOnFailure");
+                Log.d(TAG,cause.toString());
+            }
+        });
+    }
+
+    private void getSampleCards(String cardsCodes) {
+
+        cardsService.getCardsSample(cardsCodes, new CardsCallback<List<Card>>() {
+            @Override
+            public void onResponse(List<Card> response) {
+                addCards(response);
+            }
+
+            @Override
+            public void onFailure(Throwable cause) {
+                Log.d(TAG,"getCardsSample");
+                Log.d(TAG,cause.toString());
+            }
+        },true);
+    }
+
     private void drawCardFromDeck(String deckId, final Integer cards) {
         cardsService.drawCardFromDeck(deckId, cards, new CardsCallback<DrawResponse>() {
             @Override
@@ -118,16 +163,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 Log.d(TAG,"drawCardFromDeckOnResponse");
 
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        gridAdapter.addAll(response.getCards());
-                        for(Card c:response.getCards()){
-                            Log.d(TAG,"Game value of"+c+" is"+c.getGameValue());
-                        }
-                        gridView.smoothScrollToPosition(gridAdapter.getCount());
-                    }
-                });
+                addCards(response.getCards());
                 Log.d(TAG,response.toString());
             }
 
@@ -139,21 +175,35 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-
-    private void showWonAlert() {
-        AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
-        alertDialog.setTitle("WIN!");
-        alertDialog.setMessage("$$$$$$$$$$$$");
-        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-        alertDialog.show();
+    private void addCards(final List<Card> response) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                gridAdapter.addAll(response);
+                for(Card c:response){
+                    Log.d(TAG,"Game value of"+c+" is "+c.getGameValue() + " with color:" +c.getCardColor());
+                }
+                checkCards(MainActivity.this.cards);
+                gridView.smoothScrollToPosition(gridAdapter.getCount());
+            }
+        });
     }
 
+    private void showWin(List<Card> cards,String reason){
+        // Prepare grid view
+        GridView gridView = new GridView(this);
+        GridViewAdapter gridAdapter = new GridViewAdapter(this, R.layout.card_item_layout, cards);
+        gridView.setAdapter(gridAdapter);
+        gridView.setNumColumns(3);
+        gridView.setGravity(Gravity.CENTER);
+        gridView.setPadding(10,10,10,10);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(gridView);
+        builder.setTitle("You win with this cards");
+        builder.setMessage(reason);
+        builder.setPositiveButton("Yay!", null);
+        builder.show();
+    }
     private void showWarnAlert() {
         AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
         alertDialog.setTitle("No cards left");
@@ -193,33 +243,130 @@ public class MainActivity extends AppCompatActivity {
         builder.show();
     }
 
-    public static void checkCards(List<Card> cards){
+    public void checkCards(List<Card> cards){
 
+
+        List<Card> matchingCards = new ArrayList<>();
         int size = cards.size();
         for(int x=0;x<size;x++){
 
-            Integer matchingCounter = 0;
-
+            //Initial
             Card card = cards.get(x);
-
             Integer cardValue = card.getGameValue();
 
-            for(int y=x;y<size;y++){
+
+            //Prepare for check
+            Integer matchingCounter = 0;
+            matchingCards.add(card);
+
+            //Check descending
+            for(int y=x+1;y<size;y++){
+                if(y==cards.size())break;
                 Card nextCard = cards.get(y);
                 if(nextCard.getGameValue()==(cardValue+(x-y))){
                     matchingCounter++;
+                    matchingCards.add(nextCard);
+
+                }
+                if(matchingCounter==2){
+                    Log.d(TAG,"Next card match descending");
+                    MainActivity.this.showWin(matchingCards, "Descending Stairs");
+                    return;
                 }
             }
 
-        
+            //Prepare for check
+            matchingCards.clear();
+            matchingCounter = 0;
+            matchingCards.add(card);
 
+            //Check rising
+            for(int y=x+1;y<size;y++){
+                if(y==cards.size())break;
+                card = cards.get(y-1);
+                Card nextCard = cards.get(y);
 
-            if(matchingCounter==3){
-                return;
+                if(nextCard.getGameValue()==(cardValue-(x-y))){
+                    matchingCounter++;
+                    matchingCards.add(nextCard);
+
+                }
+                if(matchingCounter==2){
+                    Log.d(TAG,"Next card match rising");
+                    MainActivity.this.showWin(matchingCards, "Rising Stairs");
+                    return;
+                }
             }
+
+            //Prepare for check
+            matchingCards.clear();
+            matchingCounter = 0;
+            matchingCards.add(card);
+
+            //Check ranks
+            for(int y=x+1;y<size;y++){
+                if(y==cards.size())break;
+                Card nextCard = cards.get(y);
+                if(nextCard.getGameValue().equals(card.getGameValue())){
+                    matchingCounter++;
+                    matchingCards.add(nextCard);
+                }
+                if(matchingCounter==2){
+                    Log.d(TAG,"Next card match color");
+                    MainActivity.this.showWin(matchingCards,"Same ranks");
+                    return;
+                }
+            }
+
+            //Prepare for check
+            matchingCards.clear();
+            matchingCounter = 0;
+            matchingCards.add(card);
+
+            //Check colors
+            for(int y=x+1;y<size;y++){
+                if(y==cards.size())break;
+                Card nextCard = cards.get(y);
+                if(nextCard.getCardColor() == card.getCardColor()){
+                    matchingCounter++;
+                    matchingCards.add(nextCard);
+                }
+                if(matchingCounter==2){
+                    Log.d(TAG,"Next card match color");
+                    MainActivity.this.showWin(matchingCards,"Same color");
+                    return;
+                }
+            }
+
+            //Prepare for check
+            matchingCards.clear();
+            matchingCounter = 0;
+
+            //Check face cards
+            for(int y=x;y<size;y++){
+                if(y==cards.size())break;
+                Card nextCard = cards.get(y);
+                if(nextCard.isFaceCard()){
+                    matchingCounter++;
+                    matchingCards.add(nextCard);
+                }
+
+                if(matchingCounter==3){
+                    Log.d(TAG,"Face cards match");
+                    MainActivity.this.showWin(matchingCards,"Face cards");
+                    return;
+                }
+            }
+
+
+
+            //Stairs, descending or not
+            //Rank match, Twins
+            //Face cards
+            //Color
+
+
         }
-
-
     }
 
 

@@ -62,17 +62,48 @@ public class Card {
                 case "ACE":
                     return 1;
                 case "KING":
-                    return 12;
+                    return 13;
                 case "QUEEN":
-                    return 11;
+                    return 12;
                 case "JACK":
-                    return 10;
+                    return 11;
                 default:
-                    return Integer.valueOf(this.getValue().toCharArray()[0]+"");
+                    return Integer.valueOf(this.getValue().substring(0,this.getValue().length()));
             }
         }
         catch (Exception e){
             return -1;
+        }
+    }
+
+    public boolean isFaceCard(){
+      switch (getGameValue()){
+          case 1:
+          case 11:
+          case 12:
+              return true;
+          default:
+              return false;
+      }
+    }
+
+
+    public CardColor getCardColor(){
+        try{
+            switch(this.getCode().substring(this.getCode().length()-1)){
+                case "H":
+                    return CardColor.HEARTS;
+                case "C":
+                    return CardColor.CLUBS;
+                case "D":
+                    return CardColor.DIAMONDS;
+                case "S":
+                    return CardColor.SPADES;
+            }
+            return null;
+        }
+        catch (Exception e){
+            return null;
         }
     }
     @Override
