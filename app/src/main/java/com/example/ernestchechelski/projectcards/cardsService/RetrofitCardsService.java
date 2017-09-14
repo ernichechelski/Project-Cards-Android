@@ -9,7 +9,6 @@ import com.example.ernestchechelski.projectcards.model.DeckResponse;
 import com.example.ernestchechelski.projectcards.model.DrawResponse;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -143,7 +142,7 @@ public class RetrofitCardsService implements CardsService{
                             Collections.sort(cards, new Comparator<Card>() {
                                 @Override
                                 public int compare(Card card, Card t1) {
-                                    int value = card.getGameValue() - t1.getGameValue();
+                                    int value = card.getRankValue() - t1.getRankValue();
                                     if(value==0){
                                         value = card.getCardColor().ordinal() - t1.getCardColor().ordinal();
                                     }

@@ -56,17 +56,18 @@ public class Card {
         this.code = code;
     }
 
-    public Integer getGameValue(){
+    public Integer getRankValue(){
         try{
             switch (this.getValue()){
                 case "ACE":
                     return 1;
-                case "KING":
-                    return 13;
-                case "QUEEN":
-                    return 12;
                 case "JACK":
                     return 11;
+                case "QUEEN":
+                    return 12;
+                case "KING":
+                    return 13;
+
                 default:
                     return Integer.valueOf(this.getValue().substring(0,this.getValue().length()));
             }
@@ -77,10 +78,11 @@ public class Card {
     }
 
     public boolean isFaceCard(){
-      switch (getGameValue()){
+      switch (getRankValue()){
           case 1:
           case 11:
           case 12:
+          case 13:
               return true;
           default:
               return false;

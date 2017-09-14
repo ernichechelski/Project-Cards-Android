@@ -24,19 +24,14 @@ import javax.inject.Inject;
 public class MainActivity extends AppCompatActivity {
 
     public static String TAG = MainActivity.class.getSimpleName();
-
     private GridView gridView;
     private GridViewAdapter gridAdapter;
-    private List<Card> cards = new ArrayList<>();
-
-    private Button restartButton;
-    private Button getNextCardsButton;
-
     private String deckId;
     private Integer decks;
     private String decksCountAnswer = "";
 
-
+    @Inject
+    List<Card> cards;
     @Inject
     CardsService cardsService;
 
@@ -56,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void setUI() {
         setContentView(R.layout.activity_main);
-        restartButton = (Button) findViewById(R.id.restartGameButton);
+        Button restartButton = (Button) findViewById(R.id.restartGameButton);
         restartButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -64,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
                     MainActivity.this.startGame(decks);
             }
         });
-        getNextCardsButton = (Button) findViewById(R.id.getNextCardsButton);
+        Button getNextCardsButton = (Button) findViewById(R.id.getNextCardsButton);
         getNextCardsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -72,9 +67,7 @@ public class MainActivity extends AppCompatActivity {
                     MainActivity.this.drawCardFromDeck(deckId, 1);
             }
         });
-
         gridView = (GridView) findViewById(R.id.gridView);
-
         gridAdapter = new GridViewAdapter(this, R.layout.card_item_layout, cards);
         gridView.setAdapter(gridAdapter);
     }
@@ -82,7 +75,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void startGame(Integer decks) {
         this.decks = decks;
-
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -91,12 +83,14 @@ public class MainActivity extends AppCompatActivity {
         });
         getCards(decks);
 
+
         //getPartialDeck();
         String cardsCodes = null;
-        cardsCodes = "2H,2C,2D,2S,3C";
-        cardsCodes = "JH,KD,8H,3S,6D";
+        //cardsCodes = "2H,2C,2D,2S,3C";
+        cardsCodes = "2H,3C,4D,5C,5D";
+        //cardsCodes = "JH,KD,8H,3S,6D";
 
-        //getSampleCards(cardsCodes);
+        //getSampleCards(cardsCodes,true);
     }
 
     private void getCards(Integer decks) {
@@ -108,7 +102,6 @@ public class MainActivity extends AppCompatActivity {
                 deckId = response.getDeckId();
                 Log.d(TAG,"Draw 5 cards from deck");
                 drawCardFromDeck(response.getDeckId(),5);
-
             }
 
             @Override
@@ -138,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void getSampleCards(String cardsCodes) {
+    private void getSampleCards(String cardsCodes, boolean sortedAscending) {
 
         cardsService.getCardsSample(cardsCodes, new CardsCallback<List<Card>>() {
             @Override
@@ -151,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG,"getCardsSample");
                 Log.d(TAG,cause.toString());
             }
-        },true);
+        },sortedAscending);
     }
 
     private void drawCardFromDeck(String deckId, final Integer cards) {
@@ -181,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 gridAdapter.addAll(response);
                 for(Card c:response){
-                    Log.d(TAG,"Game value of"+c+" is "+c.getGameValue() + " with color:" +c.getCardColor());
+                    Log.d(TAG,"Game value of"+c+" is "+c.getRankValue() + " with color:" +c.getCardColor());
                 }
                 checkCards(MainActivity.this.cards);
                 gridView.smoothScrollToPosition(gridAdapter.getCount());
@@ -190,7 +183,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showWin(List<Card> cards,String reason){
-        // Prepare grid view
         GridView gridView = new GridView(this);
         GridViewAdapter gridAdapter = new GridViewAdapter(this, R.layout.card_item_layout, cards);
         gridView.setAdapter(gridAdapter);
@@ -199,16 +191,16 @@ public class MainActivity extends AppCompatActivity {
         gridView.setPadding(10,10,10,10);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setView(gridView);
-        builder.setTitle("You win with this cards");
+        builder.setTitle(R.string.win_alert_title);
         builder.setMessage(reason);
-        builder.setPositiveButton("Yay!", null);
+        builder.setPositiveButton(R.string.win_confirm_button_title, null);
         builder.show();
     }
     private void showWarnAlert() {
         AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
-        alertDialog.setTitle("No cards left");
-        alertDialog.setMessage("Restart game to draw another cards");
-        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+        alertDialog.setTitle(getString(R.string.no_cards_left));
+        alertDialog.setMessage(getString(R.string.restart_game_warning));
+        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, getString(R.string.ok),
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -220,13 +212,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void showDecksCountQuestionAlert() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("How many decks do you need in game?");
+        builder.setTitle(R.string.decks_count_question_title);
         final EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_CLASS_NUMBER| InputType.TYPE_TEXT_VARIATION_PASSWORD);
         builder.setView(input);
         builder.setCancelable(false);
         input.setGravity(Gravity.CENTER_HORIZONTAL);
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 decksCountAnswer = input.getText().toString();
@@ -234,7 +226,7 @@ public class MainActivity extends AppCompatActivity {
                 MainActivity.this.startGame(decks1);
             }
         });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
@@ -243,131 +235,74 @@ public class MainActivity extends AppCompatActivity {
         builder.show();
     }
 
+
     public void checkCards(List<Card> cards){
 
-
-        List<Card> matchingCards = new ArrayList<>();
         int size = cards.size();
         for(int x=0;x<size;x++){
-
-            //Initial
+            List<Card> matchingCards = new ArrayList<>();
             Card card = cards.get(x);
-            Integer cardValue = card.getGameValue();
 
-
-            //Prepare for check
-            Integer matchingCounter = 0;
-            matchingCards.add(card);
-
-            //Check descending
-            for(int y=x+1;y<size;y++){
-                if(y==cards.size())break;
-                Card nextCard = cards.get(y);
-                if(nextCard.getGameValue()==(cardValue+(x-y))){
-                    matchingCounter++;
-                    matchingCards.add(nextCard);
-
-                }
-                if(matchingCounter==2){
-                    Log.d(TAG,"Next card match descending");
-                    MainActivity.this.showWin(matchingCards, "Descending Stairs");
-                    return;
-                }
-            }
-
-            //Prepare for check
             matchingCards.clear();
-            matchingCounter = 0;
-            matchingCards.add(card);
-
-            //Check rising
-            for(int y=x+1;y<size;y++){
-                if(y==cards.size())break;
-                card = cards.get(y-1);
-                Card nextCard = cards.get(y);
-
-                if(nextCard.getGameValue()==(cardValue-(x-y))){
-                    matchingCounter++;
-                    matchingCards.add(nextCard);
-
-                }
-                if(matchingCounter==2){
-                    Log.d(TAG,"Next card match rising");
-                    MainActivity.this.showWin(matchingCards, "Rising Stairs");
-                    return;
-                }
-            }
-
-            //Prepare for check
-            matchingCards.clear();
-            matchingCounter = 0;
-            matchingCards.add(card);
-
-            //Check ranks
-            for(int y=x+1;y<size;y++){
-                if(y==cards.size())break;
-                Card nextCard = cards.get(y);
-                if(nextCard.getGameValue().equals(card.getGameValue())){
-                    matchingCounter++;
-                    matchingCards.add(nextCard);
-                }
-                if(matchingCounter==2){
-                    Log.d(TAG,"Next card match color");
-                    MainActivity.this.showWin(matchingCards,"Same ranks");
-                    return;
-                }
-            }
-
-            //Prepare for check
-            matchingCards.clear();
-            matchingCounter = 0;
-            matchingCards.add(card);
-
-            //Check colors
-            for(int y=x+1;y<size;y++){
-                if(y==cards.size())break;
-                Card nextCard = cards.get(y);
-                if(nextCard.getCardColor() == card.getCardColor()){
-                    matchingCounter++;
-                    matchingCards.add(nextCard);
-                }
-                if(matchingCounter==2){
-                    Log.d(TAG,"Next card match color");
-                    MainActivity.this.showWin(matchingCards,"Same color");
-                    return;
-                }
-            }
-
-            //Prepare for check
-            matchingCards.clear();
-            matchingCounter = 0;
-
-            //Check face cards
             for(int y=x;y<size;y++){
-                if(y==cards.size())break;
+                Card nextCard = cards.get(y);
+                if(card.getRankValue()+(y-x) == nextCard.getRankValue()){
+                    matchingCards.add(nextCard);
+                }
+                if(matchingCards.size()==3){
+                    showWin(matchingCards,getString(R.string.ascending_cards_match));
+                    return;
+                }
+            }
+
+            matchingCards.clear();
+            for(int y=x;y<size;y++){
+                Card nextCard = cards.get(y);
+                if(card.getRankValue()-(y-x) == nextCard.getRankValue()){
+                    matchingCards.add(nextCard);
+                }
+                if(matchingCards.size()==3){
+                    showWin(matchingCards,getString(R.string.descending_cards_match));
+                    return;
+                }
+            }
+
+            matchingCards.clear();
+            for(int y=x;y<size;y++){
+                Card nextCard = cards.get(y);
+                if(card.getRankValue().equals(nextCard.getRankValue())){
+                    matchingCards.add(nextCard);
+                }
+                if(matchingCards.size()==3){
+                    showWin(matchingCards,getString(R.string.rank_cards_match));
+                    return;
+                }
+            }
+
+            matchingCards.clear();
+            for(int y=x;y<size;y++){
                 Card nextCard = cards.get(y);
                 if(nextCard.isFaceCard()){
-                    matchingCounter++;
                     matchingCards.add(nextCard);
                 }
-
-                if(matchingCounter==3){
-                    Log.d(TAG,"Face cards match");
-                    MainActivity.this.showWin(matchingCards,"Face cards");
+                if(matchingCards.size()==3){
+                    showWin(matchingCards,getString(R.string.face_cards_match));
                     return;
                 }
             }
 
-
-
-            //Stairs, descending or not
-            //Rank match, Twins
-            //Face cards
-            //Color
-
+            matchingCards.clear();
+            for(int y=x;y<size;y++){
+                Card nextCard = cards.get(y);
+                if(card.getCardColor().ordinal() == nextCard.getCardColor().ordinal()){
+                    matchingCards.add(nextCard);
+                }
+                if(matchingCards.size()==3){
+                    showWin(matchingCards,getString(R.string.color_cards_match));
+                    return;
+                }
+            }
 
         }
     }
-
-
 }

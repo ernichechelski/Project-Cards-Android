@@ -2,4 +2,16 @@
     <string name="app_name">Project Cards</string>
     <string name="getNextCard">Get next card</string>
     <string name="restartGame">Restart game</string>
+    <string name="decks_count_question_title">How many decks do you need in game?</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="no_cards_left">No cards left</string>
+    <string name="restart_game_warning">Restart game to draw another cards</string>
+    <string name="win_alert_title">You win with this cards</string>
+    <string name="win_confirm_button_title">Yay!</string>
+    <string name="face_cards_match">Face cards</string>
+    <string name="color_cards_match">Color match</string>
+    <string name="ascending_cards_match">Ascending match</string>
+    <string name="descending_cards_match">Descending match</string>
+    <string name="rank_cards_match">Rank match</string>
 </resources>

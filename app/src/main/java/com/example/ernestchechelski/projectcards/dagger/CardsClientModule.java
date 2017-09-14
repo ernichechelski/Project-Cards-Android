@@ -2,9 +2,16 @@ package com.example.ernestchechelski.projectcards.dagger;
 
 import android.content.Context;
 
+import com.example.ernestchechelski.projectcards.GridViewAdapter;
+import com.example.ernestchechelski.projectcards.R;
 import com.example.ernestchechelski.projectcards.cardsService.CardsService;
 import com.example.ernestchechelski.projectcards.cardsService.CardsServiceApi;
 import com.example.ernestchechelski.projectcards.cardsService.RetrofitCardsService;
+import com.example.ernestchechelski.projectcards.model.Card;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -46,5 +53,11 @@ public class CardsClientModule {
     @Singleton
     CardsServiceApi provideCardsServiceApi(Retrofit retrofit){
         return  retrofit.create(CardsServiceApi.class);
+    }
+
+    @Provides
+    @Singleton
+    List<Card> provideCardsList(){
+        return new ArrayList<>();
     }
 }
