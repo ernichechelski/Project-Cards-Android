@@ -24,6 +24,7 @@ import javax.inject.Inject;
 public class MainActivity extends AppCompatActivity {
 
     public static String TAG = MainActivity.class.getSimpleName();
+    private Integer neededMatches = 9;
     private GridView gridView;
     private GridViewAdapter gridAdapter;
     private String deckId;
@@ -251,7 +252,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     break;
                 }
-                if(matchingCards.size()==3){
+                if(matchingCards.size()==neededMatches){
                     showWin(matchingCards,getString(R.string.ascending_cards_match));
                     return;
                 }
@@ -265,7 +266,7 @@ public class MainActivity extends AppCompatActivity {
                 }else {
                     break;
                 }
-                if(matchingCards.size()==3){
+                if(matchingCards.size()==neededMatches){
                     showWin(matchingCards,getString(R.string.descending_cards_match));
                     return;
                 }
@@ -277,7 +278,7 @@ public class MainActivity extends AppCompatActivity {
                 if(card.getRankValue().equals(nextCard.getRankValue())){
                     matchingCards.add(nextCard);
                 }
-                if(matchingCards.size()==3){
+                if(matchingCards.size()==neededMatches){
                     showWin(matchingCards,getString(R.string.rank_cards_match));
                     return;
                 }
@@ -289,7 +290,7 @@ public class MainActivity extends AppCompatActivity {
                 if(nextCard.isFaceCard()){
                     matchingCards.add(nextCard);
                 }
-                if(matchingCards.size()==3){
+                if(matchingCards.size()==neededMatches){
                     showWin(matchingCards,getString(R.string.face_cards_match));
                     return;
                 }
@@ -301,7 +302,7 @@ public class MainActivity extends AppCompatActivity {
                 if(card.getCardColor().ordinal() == nextCard.getCardColor().ordinal()){
                     matchingCards.add(nextCard);
                 }
-                if(matchingCards.size()==3){
+                if(matchingCards.size()==neededMatches){
                     showWin(matchingCards,getString(R.string.color_cards_match));
                     return;
                 }
