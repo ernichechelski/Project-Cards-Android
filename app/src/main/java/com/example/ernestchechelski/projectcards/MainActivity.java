@@ -248,6 +248,8 @@ public class MainActivity extends AppCompatActivity {
                 Card nextCard = cards.get(y);
                 if(card.getRankValue()+(y-x) == nextCard.getRankValue()){
                     matchingCards.add(nextCard);
+                } else {
+                    break;
                 }
                 if(matchingCards.size()==3){
                     showWin(matchingCards,getString(R.string.ascending_cards_match));
@@ -260,6 +262,8 @@ public class MainActivity extends AppCompatActivity {
                 Card nextCard = cards.get(y);
                 if(card.getRankValue()-(y-x) == nextCard.getRankValue()){
                     matchingCards.add(nextCard);
+                }else {
+                    break;
                 }
                 if(matchingCards.size()==3){
                     showWin(matchingCards,getString(R.string.descending_cards_match));
