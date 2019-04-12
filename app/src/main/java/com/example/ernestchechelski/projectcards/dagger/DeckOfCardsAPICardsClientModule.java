@@ -2,12 +2,11 @@ package com.example.ernestchechelski.projectcards.dagger;
 
 import android.content.Context;
 
-import com.example.ernestchechelski.projectcards.GridViewAdapter;
-import com.example.ernestchechelski.projectcards.R;
-import com.example.ernestchechelski.projectcards.cardsService.CardsService;
-import com.example.ernestchechelski.projectcards.cardsService.CardsServiceApi;
-import com.example.ernestchechelski.projectcards.cardsService.RetrofitCardsService;
-import com.example.ernestchechelski.projectcards.model.Card;
+import com.example.ernestchechelski.projectcards.cards.Cards;
+import com.example.ernestchechelski.projectcards.cards.deckOfCards.deckofCardsAPI.DeckOfCardsAPIService;
+import com.example.ernestchechelski.projectcards.cards.deckOfCards.deckofCardsAPI.CardsServiceApi;
+import com.example.ernestchechelski.projectcards.cards.deckOfCards.deckofCardsAPI.RetrofitDeckOfCardsAPIService;
+import com.example.ernestchechelski.projectcards.cards.deckOfCards.deckofCardsAPI.model.Card;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,12 +25,12 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 
 @Module
-public class CardsClientModule {
+public class DeckOfCardsAPICardsClientModule {
 
     @Provides
     @Singleton
-    CardsService provideCardsService(Context context) {
-        return new RetrofitCardsService(context);
+    DeckOfCardsAPIService provideCardsService(Context context) {
+        return new RetrofitDeckOfCardsAPIService(context);
     }
 
     @Provides
@@ -57,7 +56,7 @@ public class CardsClientModule {
 
     @Provides
     @Singleton
-    List<Card> provideCardsList(){
+    List<Cards.CardModel> provideCardsList(){
         return new ArrayList<>();
     }
 }

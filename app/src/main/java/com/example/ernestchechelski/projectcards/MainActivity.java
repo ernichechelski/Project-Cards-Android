@@ -7,34 +7,50 @@ import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
 import com.example.ernestchechelski.projectcards.app.MyApplication;
-import com.example.ernestchechelski.projectcards.cardsService.CardsCallback;
-import com.example.ernestchechelski.projectcards.cardsService.CardsService;
-import com.example.ernestchechelski.projectcards.model.Card;
-import com.example.ernestchechelski.projectcards.model.DeckResponse;
-import com.example.ernestchechelski.projectcards.model.DrawResponse;
+import com.example.ernestchechelski.projectcards.cards.Cards;
+import com.example.ernestchechelski.projectcards.cards.deckOfCards.DeckOfCardsRepositoryImpl;
+import com.example.ernestchechelski.projectcards.cards.deckOfCards.deckofCardsAPI.DeckOfCardsAPIService;
+import com.example.ernestchechelski.projectcards.cards.deckOfCards.deckofCardsAPI.model.Card;
+import com.example.ernestchechelski.projectcards.cards.deckOfCards.deckofCardsAPI.model.DeckResponse;
+import com.example.ernestchechelski.projectcards.cards.deckOfCards.deckofCardsAPI.model.DrawResponse;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
+
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.functions.Consumer;
 
 public class MainActivity extends AppCompatActivity {
 
     public static String TAG = MainActivity.class.getSimpleName();
     private Integer neededMatches = 9;
     private GridView gridView;
-    private GridViewAdapter gridAdapter;
+    private ImageGridViewAdapter<Cards.CardModel> gridAdapter;
     private String deckId;
     private Integer decks;
     private String decksCountAnswer = "";
 
+    private CompositeDisposable ioDisposables = new CompositeDisposable();
+    private CompositeDisposable uiDisposables = new CompositeDisposable();
+    private OnClickObservable nextCardButtonClickedObservable = new OnClickObservable();
+    private OnClickObservable restartButtonClickedObservable = new OnClickObservable();
+
+    private Consumer<Throwable> globalErrorConsumer =  new Consumer<Throwable>() {
+        @Override
+        public void accept(Throwable throwable) throws Exception {
+            showWarn(throwable.getLocalizedMessage());
+        }
+    };
+
     @Inject
-    List<Card> cards;
+    List<Cards.CardModel> cards;
+
     @Inject
-    CardsService cardsService;
+    DeckOfCardsAPIService cardsService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,32 +60,43 @@ public class MainActivity extends AppCompatActivity {
         showDecksCountQuestionAlert();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        uiDisposables.add(restartButtonClickedObservable.subscribe(new Consumer<Boolean>() {
+            @Override
+            public void accept(Boolean aBoolean) throws Exception {
+                if (decks != null) startGame(decks);
+            }
+        }));
+        uiDisposables.add(nextCardButtonClickedObservable.subscribe(new Consumer<Boolean>() {
+            @Override
+            public void accept(Boolean aBoolean) throws Exception {
+                if (deckId != null) drawCardFromDeck(deckId, 1);
+            }
+        }));
+    }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        uiDisposables.clear();
+        ioDisposables.clear();
+    }
 
     private void injectDependencies() {
         ((MyApplication)getApplication()).getAppComponent().inject(this);
     }
 
+
     private void setUI() {
         setContentView(R.layout.activity_main);
         Button restartButton = (Button) findViewById(R.id.restartGameButton);
-        restartButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (decks != null)
-                    MainActivity.this.startGame(decks);
-            }
-        });
+        restartButton.setOnClickListener(restartButtonClickedObservable);
         Button getNextCardsButton = (Button) findViewById(R.id.getNextCardsButton);
-        getNextCardsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (deckId != null)
-                    MainActivity.this.drawCardFromDeck(deckId, 1);
-            }
-        });
+        getNextCardsButton.setOnClickListener(nextCardButtonClickedObservable);
         gridView = (GridView) findViewById(R.id.gridView);
-        gridAdapter = new GridViewAdapter(this, R.layout.card_item_layout, cards);
+        gridAdapter = new ImageGridViewAdapter<>(this, R.layout.card_item_layout, cards);
         gridView.setAdapter(gridAdapter);
     }
 
@@ -95,26 +122,36 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getCards(Integer decks) {
-        cardsService.shuffle(decks, new CardsCallback<DeckResponse>() {
+        Cards.Repository cardsRepo = new DeckOfCardsRepositoryImpl(getApplicationContext());
+        ioDisposables.add(cardsRepo.getNewDeck().subscribe(new Consumer<Cards.DeckModel>() {
             @Override
-            public void onResponse(DeckResponse response) {
-                Log.d(TAG,"shuffleOnResponse");
-                Log.d(TAG,response.toString());
-                deckId = response.getDeckId();
-                Log.d(TAG,"Draw 5 cards from deck");
-                drawCardFromDeck(response.getDeckId(),5);
+            public void accept(Cards.DeckModel deckModel) throws Exception {
+                Log.d(TAG,deckModel.toString());
+                ioDisposables.add(deckModel.drawCards(5).subscribe(new Consumer<List<Cards.CardModel>>() {
+                    @Override
+                    public void accept(List<Cards.CardModel> cardModels) throws Exception {
+                        addCards(cardModels);
+                    }
+                }));
             }
+        }));
 
-            @Override
-            public void onFailure(Throwable cause) {
-                Log.d(TAG,"shuffleOnFailure");
-                Log.d(TAG,cause.toString());
-            }
-        });
+        ioDisposables.add(cardsService
+                .getShuffledDeck(decks)
+                .subscribe(new Consumer<DeckResponse>() {
+                    @Override
+                    public void accept(DeckResponse response) throws Exception {
+                        Log.d(TAG, "shuffleOnResponse");
+                        Log.d(TAG, response.toString());
+                        deckId = response.getDeckId();
+                        Log.d(TAG, "Draw 5 cards from deck");
+                        drawCardFromDeck(response.getDeckId(), 5);
+                    }
+                }, globalErrorConsumer));
     }
 
     private void getPartialDeck() {
-        cardsService.getPartialDeck("2C,3C,4C,5C,6C", new CardsCallback<DeckResponse>() {
+       /* cardsService.getPartialDeck("2C,3C,4C,5C,6C", new CardsCallback<DeckResponse>() {
             @Override
             public void onResponse(DeckResponse response) {
                 Log.d(TAG,"getPartialDeckOnResponse");
@@ -129,53 +166,34 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG,"getPartialDeckOnFailure");
                 Log.d(TAG,cause.toString());
             }
-        });
+        });*/
     }
 
-    private void getSampleCards(String cardsCodes, boolean sortedAscending) {
-
-        cardsService.getCardsSample(cardsCodes, new CardsCallback<List<Card>>() {
-            @Override
-            public void onResponse(List<Card> response) {
-                addCards(response);
-            }
-
-            @Override
-            public void onFailure(Throwable cause) {
-                Log.d(TAG,"getCardsSample");
-                Log.d(TAG,cause.toString());
-            }
-        },sortedAscending);
-    }
 
     private void drawCardFromDeck(String deckId, final Integer cards) {
-        cardsService.drawCardFromDeck(deckId, cards, new CardsCallback<DrawResponse>() {
+        ioDisposables.add(cardsService
+                .drawCardFromDeckObservable(deckId,cards)
+                .subscribe(new Consumer<DrawResponse>() {
             @Override
-            public void onResponse(final DrawResponse response) {
+            public void accept(DrawResponse response) throws Exception {
                 if(!response.getSuccess()){
                     showWarnAlert();
                 }
                 Log.d(TAG,"drawCardFromDeckOnResponse");
 
-                addCards(response.getCards());
+                //addCards(response.getCards());
                 Log.d(TAG,response.toString());
             }
-
-            @Override
-            public void onFailure(Throwable cause) {
-                Log.d(TAG,"drawCardFromDeckOnFailure");
-                Log.d(TAG,cause.toString());
-            }
-        });
+        },globalErrorConsumer));
     }
 
-    private void addCards(final List<Card> response) {
+    private void addCards(final List<Cards.CardModel> response) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 gridAdapter.addAll(response);
-                for(Card c:response){
-                    Log.d(TAG,"Game value of"+c+" is "+c.getRankValue() + " with color:" +c.getCardColor());
+                for(Cards.CardModel c:response){
+                    Log.d(TAG,"Game value of"+c+" is: "+c.getRank() + " with color: " +c.getCode() + " with generated code: " + c.getCode());
                 }
                 checkCards(MainActivity.this.cards);
                 gridView.smoothScrollToPosition(gridAdapter.getCount());
@@ -183,9 +201,10 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void showWin(List<Card> cards,String reason){
+    private void showWin(List<Cards.CardModel> cards,String reason){
+        ioDisposables.clear();
         GridView gridView = new GridView(this);
-        GridViewAdapter gridAdapter = new GridViewAdapter(this, R.layout.card_item_layout, cards);
+        ImageGridViewAdapter gridAdapter = new ImageGridViewAdapter<Cards.CardModel>(this, R.layout.card_item_layout, cards);
         gridView.setAdapter(gridAdapter);
         gridView.setNumColumns(3);
         gridView.setGravity(Gravity.CENTER);
@@ -201,6 +220,20 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
         alertDialog.setTitle(getString(R.string.no_cards_left));
         alertDialog.setMessage(getString(R.string.restart_game_warning));
+        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, getString(R.string.ok),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        alertDialog.show();
+    }
+
+    private void showWarn(String text) {
+        AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+        alertDialog.setTitle("Warning");
+        alertDialog.setMessage(text);
         alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, getString(R.string.ok),
                 new DialogInterface.OnClickListener() {
                     @Override
@@ -237,17 +270,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void checkCards(List<Card> cards){
+    public void checkCards(List<Cards.CardModel> cards){
 
         int size = cards.size();
         for(int x=0;x<size;x++){
-            List<Card> matchingCards = new ArrayList<>();
-            Card card = cards.get(x);
+            List<Cards.CardModel> matchingCards = new ArrayList<>();
+            Cards.CardModel card = cards.get(x);
 
             matchingCards.clear();
             for(int y=x;y<size;y++){
-                Card nextCard = cards.get(y);
-                if(card.getRankValue()+(y-x) == nextCard.getRankValue()){
+                Cards.CardModel nextCard = cards.get(y);
+                if(card.getRank().rankValue+(y-x) == nextCard.getRank().rankValue){
                     matchingCards.add(nextCard);
                 } else {
                     break;
@@ -260,8 +293,8 @@ public class MainActivity extends AppCompatActivity {
 
             matchingCards.clear();
             for(int y=x;y<size;y++){
-                Card nextCard = cards.get(y);
-                if(card.getRankValue()-(y-x) == nextCard.getRankValue()){
+                Cards.CardModel nextCard = cards.get(y);
+                if(card.getRank().rankValue-(y-x) == nextCard.getRank().rankValue){
                     matchingCards.add(nextCard);
                 }else {
                     break;
@@ -274,8 +307,8 @@ public class MainActivity extends AppCompatActivity {
 
             matchingCards.clear();
             for(int y=x;y<size;y++){
-                Card nextCard = cards.get(y);
-                if(card.getRankValue().equals(nextCard.getRankValue())){
+                Cards.CardModel nextCard = cards.get(y);
+                if(card.getRank().equals(nextCard.getRank())){
                     matchingCards.add(nextCard);
                 }
                 if(matchingCards.size()==neededMatches){
@@ -286,8 +319,8 @@ public class MainActivity extends AppCompatActivity {
 
             matchingCards.clear();
             for(int y=x;y<size;y++){
-                Card nextCard = cards.get(y);
-                if(nextCard.isFaceCard()){
+                Cards.CardModel nextCard = cards.get(y);
+                if(nextCard.getRank().isFaceCard()){
                     matchingCards.add(nextCard);
                 }
                 if(matchingCards.size()==neededMatches){
@@ -298,8 +331,8 @@ public class MainActivity extends AppCompatActivity {
 
             matchingCards.clear();
             for(int y=x;y<size;y++){
-                Card nextCard = cards.get(y);
-                if(card.getCardColor().ordinal() == nextCard.getCardColor().ordinal()){
+                Cards.CardModel nextCard = cards.get(y);
+                if(card.getColor().ordinal() == nextCard.getColor().ordinal()){
                     matchingCards.add(nextCard);
                 }
                 if(matchingCards.size()==neededMatches){
@@ -307,7 +340,6 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
             }
-
         }
     }
 }

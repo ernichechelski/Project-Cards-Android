@@ -1,8 +1,8 @@
-package com.example.ernestchechelski.projectcards.cardsService;
+package com.example.ernestchechelski.projectcards.cards.deckOfCards.deckofCardsAPI;
 
 
-import com.example.ernestchechelski.projectcards.model.DeckResponse;
-import com.example.ernestchechelski.projectcards.model.DrawResponse;
+import com.example.ernestchechelski.projectcards.cards.deckOfCards.deckofCardsAPI.model.DeckResponse;
+import com.example.ernestchechelski.projectcards.cards.deckOfCards.deckofCardsAPI.model.DrawResponse;
 
 import retrofit2.Call;
 import retrofit2.http.GET;

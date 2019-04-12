@@ -1,25 +1,24 @@
-package com.example.ernestchechelski.projectcards.model;
+package com.example.ernestchechelski.projectcards.cards.deckOfCards.deckofCardsAPI.model;
 
 /**
  * Created by ernest.chechelski on 9/11/2017.
  */
 
-import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 
-public class DrawResponse {
+public class DeckResponse {
 
     @SerializedName("success")
     @Expose
     private Boolean success;
-    @SerializedName("cards")
-    @Expose
-    private List<Card> cards = null;
     @SerializedName("deck_id")
     @Expose
     private String deckId;
+    @SerializedName("shuffled")
+    @Expose
+    private Boolean shuffled;
     @SerializedName("remaining")
     @Expose
     private Integer remaining;
@@ -28,21 +27,21 @@ public class DrawResponse {
      * No args constructor for use in serialization
      *
      */
-    public DrawResponse() {
+    public DeckResponse() {
     }
 
     /**
      *
      * @param remaining
+     * @param shuffled
      * @param deckId
      * @param success
-     * @param cards
      */
-    public DrawResponse(Boolean success, List<Card> cards, String deckId, Integer remaining) {
+    public DeckResponse(Boolean success, String deckId, Boolean shuffled, Integer remaining) {
         super();
         this.success = success;
-        this.cards = cards;
         this.deckId = deckId;
+        this.shuffled = shuffled;
         this.remaining = remaining;
     }
 
@@ -54,20 +53,20 @@ public class DrawResponse {
         this.success = success;
     }
 
-    public List<Card> getCards() {
-        return cards;
-    }
-
-    public void setCards(List<Card> cards) {
-        this.cards = cards;
-    }
-
     public String getDeckId() {
         return deckId;
     }
 
     public void setDeckId(String deckId) {
         this.deckId = deckId;
+    }
+
+    public Boolean getShuffled() {
+        return shuffled;
+    }
+
+    public void setShuffled(Boolean shuffled) {
+        this.shuffled = shuffled;
     }
 
     public Integer getRemaining() {
@@ -80,12 +79,14 @@ public class DrawResponse {
 
     @Override
     public String toString() {
-        return "DrawResponse{" +
+        return "DeckResponse{" +
                 "success=" + success +
-                ", cards=" + cards +
                 ", deckId='" + deckId + '\'' +
+                ", shuffled=" + shuffled +
                 ", remaining=" + remaining +
                 '}';
     }
-
 }
+
+
+
