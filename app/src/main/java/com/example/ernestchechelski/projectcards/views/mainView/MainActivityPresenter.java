@@ -54,6 +54,9 @@ public class MainActivityPresenter implements MainActivityContract.Presenter {
 
     @Override
     public void drawCards() {
+        if(currentDeck==null){
+            throw new IllegalStateException("Game is not started yet");
+        }
         ioDisposables
                 .add(currentDeck
                         .drawCards(CARDS_TO_DRAW)

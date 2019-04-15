@@ -6,6 +6,7 @@
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="no_cards_left">No cards left</string>
+    <string name="warning">Warning</string>
     <string name="restart_game_warning">Restart game to draw another cards</string>
     <string name="win_alert_title">You win with this cards</string>
     <string name="win_confirm_button_title">Yay!</string>

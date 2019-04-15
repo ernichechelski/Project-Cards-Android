@@ -35,6 +35,13 @@ public class MainActivity extends AppCompatActivity implements MainActivityContr
     private ImageGridViewAdapter<Cards.CardModel> gridAdapter;
     private MainActivityContract.Presenter presenter;
 
+    private Consumer<Throwable> globalErrorConsumer =  new Consumer<Throwable>() {
+        @Override
+        public void accept(Throwable throwable) throws Exception {
+            showWarning(throwable.getLocalizedMessage());
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityContr
             public void accept(Boolean aBoolean) throws Exception {
                presenter.resetGame();
             }
-        }));
+        },globalErrorConsumer));
         this.uiDisposables.add(nextCardButtonClickedObservable
                 .throttleFirst(1, TimeUnit.SECONDS)
                 .subscribe(new Consumer<Boolean>() {
@@ -65,7 +72,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityContr
             public void accept(Boolean aBoolean) throws Exception {
               presenter.drawCards();
             }
-        }));
+        },globalErrorConsumer));
     }
 
     @Override
@@ -143,7 +150,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityContr
     public void showWarning(String message) {
         stopRespondingToActions();
         AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
-        alertDialog.setTitle(getString(R.string.no_cards_left));
+        alertDialog.setTitle(getString(R.string.warning));
         alertDialog.setMessage(message);
         alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, getString(R.string.ok),
                 new DialogInterface.OnClickListener() {
