@@ -1,6 +1,6 @@
 package com.example.ernestchechelski.projectcards.cards;
 
-import com.example.ernestchechelski.projectcards.ImageGridViewAdapter;
+import com.example.ernestchechelski.projectcards.views.ImageGridViewAdapter;
 import com.example.ernestchechelski.projectcards.cards.deckOfCards.deckofCardsAPI.model.Card;
 
 import java.util.List;
@@ -12,8 +12,12 @@ public interface Cards {
 
     interface Repository {
         Observable<DeckModel> getNewDeck();
+        Observable<DeckModel> getShuffledDeck(Integer fromDecks);
         Observable<DeckModel> getPartialDeck(List<Card> cards);
     }
+
+
+
 
     interface CardModel extends ImageGridViewAdapter.ImageUrlProvider {
         CardColor getColor();

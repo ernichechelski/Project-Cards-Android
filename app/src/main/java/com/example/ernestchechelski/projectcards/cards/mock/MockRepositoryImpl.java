@@ -61,7 +61,12 @@ public class MockRepositoryImpl implements Cards.Repository {
     }
 
     @Override
+    public Observable<Cards.DeckModel> getShuffledDeck(Integer fromDecks) {
+        return getNewDeck();
+    }
+
+    @Override
     public Observable<Cards.DeckModel> getPartialDeck(List<Card> cards) {
-        return null;
+        return getNewDeck();
     }
 }

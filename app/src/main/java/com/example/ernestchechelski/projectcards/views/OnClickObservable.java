@@ -1,4 +1,4 @@
-package com.example.ernestchechelski.projectcards;
+package com.example.ernestchechelski.projectcards.views;
 
 import io.reactivex.Observable;
 import io.reactivex.Observer;
@@ -8,7 +8,7 @@ import android.view.View;
 
 public class OnClickObservable extends Observable<Boolean> implements View.OnClickListener {
 
-    PublishSubject<Boolean> internalPublishSubject = PublishSubject.create();
+    private PublishSubject<Boolean> internalPublishSubject = PublishSubject.create();
 
     @Override
     public void onClick(View view) {

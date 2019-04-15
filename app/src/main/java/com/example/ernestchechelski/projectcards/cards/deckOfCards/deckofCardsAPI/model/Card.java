@@ -3,7 +3,7 @@ package com.example.ernestchechelski.projectcards.cards.deckOfCards.deckofCardsA
 /**
  * Created by ernest.chechelski on 9/11/2017.
  */
-import com.example.ernestchechelski.projectcards.ImageGridViewAdapter;
+import com.example.ernestchechelski.projectcards.views.ImageGridViewAdapter;
 import com.example.ernestchechelski.projectcards.cards.CardColor;
 import com.example.ernestchechelski.projectcards.cards.CardRank;
 import com.example.ernestchechelski.projectcards.cards.Cards;

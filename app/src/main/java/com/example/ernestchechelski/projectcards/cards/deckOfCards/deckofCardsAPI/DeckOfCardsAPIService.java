@@ -17,6 +17,6 @@ public interface DeckOfCardsAPIService {
     Observable<DeckResponse> getShuffledDeck(Integer decks);
     Observable<DeckResponse> newDeckObservable();
     Observable<DrawResponse> drawCardFromDeckObservable(String deckId, Integer cards);
-    Observable<DeckResponse> partialDeckObservable(String cardsCodes);
+    Observable<DeckResponse> partialDeckObservable(List<Card> cards);
     Observable<List<Card>> cardsObservable(String cardsCodes);
 }

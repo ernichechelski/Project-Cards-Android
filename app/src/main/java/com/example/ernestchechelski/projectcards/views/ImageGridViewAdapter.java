@@ -1,4 +1,4 @@
-package com.example.ernestchechelski.projectcards;
+package com.example.ernestchechelski.projectcards.views;
 
 import android.app.Activity;
 import android.content.Context;
@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 
-import com.example.ernestchechelski.projectcards.cards.deckOfCards.deckofCardsAPI.model.Card;
+import com.example.ernestchechelski.projectcards.R;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -18,12 +18,17 @@ import java.util.List;
  * Created by ernest.chechelski on 9/12/2017.
  */
 
-public class GridViewAdapter extends ArrayAdapter {
+public class ImageGridViewAdapter<T extends ImageGridViewAdapter.ImageUrlProvider> extends ArrayAdapter {
+
+    public interface ImageUrlProvider {
+        String getImageUrl();
+    }
+
     private Context context;
     private int layoutResourceId;
-    private List<Card> data = new ArrayList<Card>();
+    private List<T> data;
 
-    public GridViewAdapter(Context context, int layoutResourceId, List data) {
+    public ImageGridViewAdapter(Context context, int layoutResourceId, List<T> data) {
         super(context, layoutResourceId, data);
         this.layoutResourceId = layoutResourceId;
         this.context = context;
@@ -33,7 +38,7 @@ public class GridViewAdapter extends ArrayAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View row = convertView;
-        ViewHolder holder = null;
+        ViewHolder holder;
 
         if (row == null) {
             LayoutInflater inflater = ((Activity) context).getLayoutInflater();
@@ -45,8 +50,8 @@ public class GridViewAdapter extends ArrayAdapter {
             holder = (ViewHolder) row.getTag();
         }
 
-        Card item = data.get(position);
-        Picasso.with(context).load(item.getImage()).into(holder.image);
+        T item = data.get(position);
+        Picasso.with(context).load(item.getImageUrl()).into(holder.image);
         return row;
     }
 
